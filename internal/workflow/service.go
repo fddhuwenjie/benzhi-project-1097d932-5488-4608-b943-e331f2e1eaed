@@ -5,7 +5,9 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io"
 	"strings"
 	"sync"
 	"time"
@@ -13,6 +15,10 @@ import (
 	"benzhi-project-1097d932-5488-4608-b943-e331f2e1eaed/internal/accessibility"
 	"benzhi-project-1097d932-5488-4608-b943-e331f2e1eaed/internal/audit"
 )
+
+const entropyErrorCode = "ENTROPY_UNAVAILABLE"
+
+var errEntropyUnavailable = errors.New("crypto/rand: 系统熵源不可用")
 
 type Service struct {
 	repo  Repository
@@ -30,12 +36,17 @@ func (s *Service) withCaseLock(caseID string, fn func() ([]byte, bool, error)) (
 	return fn()
 }
 
-func newID(prefix string) string {
+// newID generates a cryptographically random identifier with the given prefix.
+// When the system entropy source (crypto/rand.Reader) is unavailable it returns
+// an error identifiable via errors.Is(err, errEntropyUnavailable) and the
+// ENTROPY_UNAVAILABLE application error code instead of panicking, so callers
+// can surface it as a recoverable service error to the HTTP layer.
+func newID(prefix string) (string, error) {
 	raw := make([]byte, 12)
-	if _, err := rand.Read(raw); err != nil {
-		panic(fmt.Sprintf("生成 %s 标识失败: %v", prefix, err))
+	if _, err := io.ReadFull(rand.Reader, raw); err != nil {
+		return "", &Error{Code: entropyErrorCode, Message: fmt.Sprintf("生成 %s 标识失败: %v", prefix, err), Cause: fmt.Errorf("%w: %v", errEntropyUnavailable, err)}
 	}
-	return prefix + "_" + hex.EncodeToString(raw)
+	return prefix + "_" + hex.EncodeToString(raw), nil
 }
 
 func payloadHash(command any) (string, error) {
@@ -80,7 +91,11 @@ func lastEvent(events []audit.Event) audit.Event {
 }
 
 func eventFor(a *accessibility.CaseAggregate, events []audit.Event, eventType, actor string, result any, now time.Time) (audit.Event, error) {
-	return audit.NewEvent(a.Case.CaseID, newID("evt"), eventType, actor, a.Case.Revision, result, lastEvent(events), now)
+	eventID, err := newID("evt")
+	if err != nil {
+		return audit.Event{}, err
+	}
+	return audit.NewEvent(a.Case.CaseID, eventID, eventType, actor, a.Case.Revision, result, lastEvent(events), now)
 }
 
 func decodeResult(raw []byte, target any) error {

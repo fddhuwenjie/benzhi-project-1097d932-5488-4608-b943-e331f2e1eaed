@@ -46,8 +46,12 @@ func (s *Service) SubmitEvidence(ctx context.Context, caseID string, cmd SubmitE
 				return Mutation{}, NewError("EVIDENCE_CHAIN_BROKEN", "第 %d 轮 before_digest 必须等于上一轮 after_digest", round)
 			}
 		}
+		evidenceID, err := newID("evidence")
+		if err != nil {
+			return Mutation{}, err
+		}
 		evidence := accessibility.RemediationEvidence{
-			EvidenceID: newID("evidence"), FindingID: finding.FindingID, Round: round, SupersedesEvidenceID: strings.TrimSpace(cmd.SupersedesEvidenceID), ChangeSummary: strings.TrimSpace(cmd.ChangeSummary),
+			EvidenceID: evidenceID, FindingID: finding.FindingID, Round: round, SupersedesEvidenceID: strings.TrimSpace(cmd.SupersedesEvidenceID), ChangeSummary: strings.TrimSpace(cmd.ChangeSummary),
 			BeforeDigest: strings.ToLower(cmd.BeforeDigest), AfterDigest: strings.ToLower(cmd.AfterDigest),
 			VerificationResult: result, FailureReason: strings.TrimSpace(cmd.FailureReason), SubmittedBy: cmd.ActorID, SubmittedAt: now,
 		}
@@ -145,8 +149,12 @@ func (s *Service) DecideReview(ctx context.Context, caseID string, cmd DecideRev
 				break
 			}
 		}
+		decisionID, err := newID("decision")
+		if err != nil {
+			return Mutation{}, err
+		}
 		decision := accessibility.ReviewDecision{
-			DecisionID: newID("decision"), CaseID: caseID, ReviewerID: cmd.ActorID, Outcome: outcome,
+			DecisionID: decisionID, CaseID: caseID, ReviewerID: cmd.ActorID, Outcome: outcome,
 			Reason: strings.TrimSpace(cmd.Reason), SeparationCheck: true, ReviewedRevision: a.Case.Revision, PreviousReturnDecisionID: previousReturnID, DecidedAt: now,
 		}
 		a.Decisions = append(a.Decisions, decision)
@@ -161,7 +169,11 @@ func (s *Service) DecideReview(ctx context.Context, caseID string, cmd DecideRev
 			for _, input := range cmd.RemediationItems {
 				finding, _ := a.Finding(input.FindingID)
 				finding.Status = accessibility.FindingOpen
-				a.RemediationItems = append(a.RemediationItems, accessibility.ReviewRemediationItem{ItemID: newID("remediation_item"), CaseID: caseID, DecisionID: decision.DecisionID, FindingID: input.FindingID, Requirement: strings.TrimSpace(input.Requirement), Priority: strings.ToUpper(strings.TrimSpace(input.Priority)), Status: accessibility.RemediationItemPending, CreatedAt: now})
+				itemID, err := newID("remediation_item")
+				if err != nil {
+					return Mutation{}, err
+				}
+				a.RemediationItems = append(a.RemediationItems, accessibility.ReviewRemediationItem{ItemID: itemID, CaseID: caseID, DecisionID: decision.DecisionID, FindingID: input.FindingID, Requirement: strings.TrimSpace(input.Requirement), Priority: strings.ToUpper(strings.TrimSpace(input.Priority)), Status: accessibility.RemediationItemPending, CreatedAt: now})
 			}
 			if err := a.Transition(accessibility.StatusRemediating); err != nil {
 				return Mutation{}, err

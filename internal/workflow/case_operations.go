@@ -34,8 +34,12 @@ func (s *Service) CreateCase(ctx context.Context, cmd CreateCaseCommand) (access
 		return accessibility.CaseAggregate{}, false, err
 	}
 	now := s.now().UTC()
+	caseID, err := newID("case")
+	if err != nil {
+		return accessibility.CaseAggregate{}, false, err
+	}
 	a := accessibility.CaseAggregate{Case: accessibility.PublicationCase{
-		CaseID: newID("case"), Title: strings.TrimSpace(cmd.Title), Edition: strings.TrimSpace(cmd.Edition),
+		CaseID: caseID, Title: strings.TrimSpace(cmd.Title), Edition: strings.TrimSpace(cmd.Edition),
 		MediaFormat: strings.TrimSpace(cmd.MediaFormat), OwnerID: strings.TrimSpace(cmd.OwnerID),
 		ContentDigest: strings.ToLower(strings.TrimSpace(cmd.ContentDigest)), Status: accessibility.StatusDraft,
 		Revision: 1, CreatedAt: now, UpdatedAt: now,
@@ -43,7 +47,11 @@ func (s *Service) CreateCase(ctx context.Context, cmd CreateCaseCommand) (access
 	if err := accessibility.ValidateNewCase(a.Case); err != nil {
 		return accessibility.CaseAggregate{}, false, WrapRule(err)
 	}
-	event, err := audit.NewEvent(a.Case.CaseID, newID("evt"), "CASE_CREATED", a.Case.OwnerID, 1, a.Case, audit.Event{}, now)
+	eventID, err := newID("evt")
+	if err != nil {
+		return accessibility.CaseAggregate{}, false, err
+	}
+	event, err := audit.NewEvent(a.Case.CaseID, eventID, "CASE_CREATED", a.Case.OwnerID, 1, a.Case, audit.Event{}, now)
 	if err != nil {
 		return accessibility.CaseAggregate{}, false, err
 	}
@@ -68,8 +76,12 @@ func (s *Service) FreezeProfile(ctx context.Context, caseID string, cmd FreezePr
 		if !preflight.CanFreeze {
 			return Mutation{}, NewDetailedError("VALIDATION_ERROR", "候选要求基线未通过预检", preflight)
 		}
+		profileID, err := newID("profile")
+		if err != nil {
+			return Mutation{}, err
+		}
 		profile := accessibility.RequirementProfile{
-			ProfileID: newID("profile"), CaseID: caseID, RulesetVersion: preflight.RulesetVersion,
+			ProfileID: profileID, CaseID: caseID, RulesetVersion: preflight.RulesetVersion,
 			RuleCodes: preflight.RuleCodes, BlockingSeverities: preflight.BlockingSeverities,
 			FrozenBy: cmd.ActorID, FrozenAt: now,
 		}
@@ -111,7 +123,11 @@ func (s *Service) AddFindings(ctx context.Context, caseID string, cmd AddFinding
 		created := make([]accessibility.AccessibilityFinding, 0, len(candidates))
 		distribution := map[accessibility.Severity]int{}
 		for _, item := range candidates {
-			finding := accessibility.AccessibilityFinding{FindingID: newID("finding"), CaseID: caseID, RuleCode: strings.ToUpper(strings.TrimSpace(item.RuleCode)), ContentLocator: strings.TrimSpace(item.ContentLocator), Severity: item.Severity, Impact: strings.TrimSpace(item.Impact), Status: accessibility.FindingOpen, ReportedBy: cmd.ActorID, ReportedAt: now}
+			findingID, err := newID("finding")
+			if err != nil {
+				return Mutation{}, err
+			}
+			finding := accessibility.AccessibilityFinding{FindingID: findingID, CaseID: caseID, RuleCode: strings.ToUpper(strings.TrimSpace(item.RuleCode)), ContentLocator: strings.TrimSpace(item.ContentLocator), Severity: item.Severity, Impact: strings.TrimSpace(item.Impact), Status: accessibility.FindingOpen, ReportedBy: cmd.ActorID, ReportedAt: now}
 			a.Findings = append(a.Findings, finding)
 			created = append(created, finding)
 			distribution[item.Severity]++
@@ -170,8 +186,12 @@ func (s *Service) AddFinding(ctx context.Context, caseID string, cmd AddFindingC
 				return Mutation{}, NewError("DUPLICATE_FINDING", "规则和内容定位与已有发现项重复")
 			}
 		}
+		findingID, err := newID("finding")
+		if err != nil {
+			return Mutation{}, err
+		}
 		finding := accessibility.AccessibilityFinding{
-			FindingID: newID("finding"), CaseID: caseID, RuleCode: strings.ToUpper(strings.TrimSpace(cmd.RuleCode)),
+			FindingID: findingID, CaseID: caseID, RuleCode: strings.ToUpper(strings.TrimSpace(cmd.RuleCode)),
 			ContentLocator: strings.TrimSpace(cmd.ContentLocator), Severity: severity, Impact: strings.TrimSpace(cmd.Impact),
 			Status: accessibility.FindingOpen, ReportedBy: cmd.ActorID, ReportedAt: now,
 		}
