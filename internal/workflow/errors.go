@@ -29,7 +29,11 @@ func WrapRule(err error) error {
 	if err == nil {
 		return nil
 	}
-	if _, ok := err.(*Error); ok {
+	// errors.As 沿 Unwrap 链向下探测，既能识别直接的 *Error，
+	// 也能识别被 fmt.Errorf("%w", ...) 包装过的 *Error，从而保留
+	// 原始稳定错误码（如 NOT_FOUND），避免被误判为 INTERNAL_ERROR。
+	var app *Error
+	if errors.As(err, &app) {
 		return err
 	}
 	var rule *accessibility.RuleError
