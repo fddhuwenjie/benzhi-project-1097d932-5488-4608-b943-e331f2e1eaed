@@ -44,7 +44,7 @@ func (r *SQLiteRepository) List(ctx context.Context) ([]accessibility.Publicatio
 	if r.listCacheValid {
 		cached := r.listCache
 		r.listMu.RUnlock()
-		return cached, nil
+		return append([]accessibility.PublicationCase(nil), cached...), nil
 	}
 	r.listMu.RUnlock()
 	rows, err := r.db.QueryContext(ctx, `SELECT aggregate_json FROM publication_cases ORDER BY updated_at DESC, case_id`)
@@ -68,7 +68,7 @@ func (r *SQLiteRepository) List(ctx context.Context) ([]accessibility.Publicatio
 		return nil, err
 	}
 	r.listMu.Lock()
-	r.listCache = result
+	r.listCache = append([]accessibility.PublicationCase(nil), result...)
 	r.listCacheValid = true
 	r.listMu.Unlock()
 	return result, nil
