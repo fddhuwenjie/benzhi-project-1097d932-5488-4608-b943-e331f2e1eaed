@@ -1,0 +1,68 @@
+:root{font-family:Inter,"PingFang SC","Microsoft YaHei",sans-serif;color:#17221e;background:#f1f3ed;--ink:#17221e;--green:#174a3b;--mint:#dceae3;--line:#d1d8d1;--paper:#fffef9;--amber:#b86b19}
+*{box-sizing:border-box}
+body{margin:0}
+.topbar{height:92px;padding:18px 32px;background:var(--ink);color:white;display:flex;align-items:center;justify-content:space-between}
+.topbar h1{margin:3px 0;font-family:serif;font-size:27px}
+.eyebrow{font-size:10px;letter-spacing:.18em;color:#a8c7bc}
+.connection{font-size:13px;border:1px solid #49675e;padding:9px 14px;border-radius:20px}
+main{display:grid;grid-template-columns:270px 1fr;min-height:calc(100vh - 92px)}
+aside{padding:24px 18px;border-right:1px solid var(--line);background:#e7ebe5}
+aside h2{font-size:12px;text-transform:uppercase;letter-spacing:.12em;margin-top:28px}
+.workspace{padding:28px;max-width:1200px;width:100%;margin:auto}
+.primary,button{border:0;border-radius:5px;background:var(--green);color:white;padding:10px 14px;font-weight:650;cursor:pointer}
+.primary{width:100%}
+.secondary{background:white;color:var(--green);border:1px solid var(--green)}
+button:disabled{opacity:.35;cursor:not-allowed}
+.case-list button{width:100%;text-align:left;background:transparent;color:var(--ink);border-top:1px solid var(--line);border-radius:0;padding:14px 6px}
+.case-list button.active{border-left:3px solid var(--green);padding-left:10px;background:#dce3dc}
+.case-list small{display:block;color:#68756e;margin-top:4px}
+.empty{text-align:center;padding:14vh 20px}
+.seal{margin:auto;width:72px;height:72px;border:2px solid var(--green);border-radius:50%;display:grid;place-items:center;font-size:36px;color:var(--green)}
+.case-heading{display:flex;justify-content:space-between;align-items:center}
+.case-heading h2{font-family:serif;font-size:31px;margin:7px 0}
+.status{font-size:11px;letter-spacing:.08em;background:var(--mint);color:var(--green);padding:5px 9px;border-radius:13px}
+.revision{background:white;border:1px solid var(--line);padding:12px 16px}
+#steps{display:flex;gap:3px;margin:22px 0;overflow:auto}
+#steps span{padding:9px 10px;white-space:nowrap;font-size:11px;border-bottom:3px solid var(--line)}
+#steps .done,#steps .current{border-color:var(--green);color:var(--green)}
+.panel{background:var(--paper);border:1px solid var(--line);padding:20px;margin:14px 0;box-shadow:0 2px 5px #17221e08}
+.panel h3{margin-top:0;font-family:serif;font-size:21px}
+.facts{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.fact{border-left:2px solid var(--mint);padding-left:10px}
+.fact small{display:block;color:#68756e;margin-bottom:5px}
+form{display:flex;gap:12px;align-items:end;flex-wrap:wrap;margin:12px 0}
+label{display:flex;flex-direction:column;gap:5px;font-size:12px;color:#51615a;min-width:160px;flex:1}
+input,select{font:inherit;font-size:14px;padding:9px;border:1px solid #bbc7bf;border-radius:4px;background:white}
+.item{border-top:1px solid var(--line);padding:12px 0;display:flex;justify-content:space-between;gap:16px}
+.badge{font-size:10px;padding:4px 7px;border-radius:9px;background:#eee}
+.CRITICAL{background:#f4d7d1;color:#8d2d23}
+.MAJOR{background:#f3e2c7;color:#8a5115}
+.RESOLVED{background:var(--mint);color:var(--green)}
+.muted{color:#6d7772;font-size:13px}
+#notice:not(:empty){padding:11px;margin:10px 0;background:#f5e8d3;border-left:3px solid var(--amber)}
+dialog{border:0;border-radius:8px;padding:24px;max-width:650px;box-shadow:0 20px 70px #0005}
+dialog::backdrop{background:#17221eaa}
+dialog form{display:grid;min-width:500px}
+.actions{text-align:right}
+.digest{font-family:monospace;font-size:11px;word-break:break-all}
+details{margin-top:18px}
+#timeline .item{font-size:12px}
+.rows{width:100%}
+.finding-row{display:grid;grid-template-columns:1fr 1fr 1.6fr 2fr auto;gap:8px;margin:8px 0}
+.finding-row label{min-width:0}
+.compact{font-size:12px;padding:7px 9px}
+.verification{padding:10px;margin:10px 0;background:#edf4ef;border-left:3px solid var(--green)}
+.verification.failed{background:#f5e8d3;border-color:var(--amber)}
+.timeline-round{margin:6px 0 6px 18px;padding:8px;border-left:2px solid var(--mint)}
+#remediation-editor{width:100%;padding:12px;background:#f7f4ea}
+#remediation-editor label{margin:8px 0}
+@media(max-width:760px){main{grid-template-columns:1fr}
+aside{border-right:0}
+.workspace{padding:15px}
+.facts{grid-template-columns:1fr 1fr}
+.topbar{padding:15px}
+.connection{display:none}
+dialog form{min-width:auto}
+.finding-row{grid-template-columns:1fr 1fr}
+.finding-row label:nth-child(n+3){grid-column:1/-1}
+}
