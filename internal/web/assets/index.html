@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>无障碍出版放行台</title>
+  <link rel="stylesheet" href="/assets/app.css">
+</head>
+<body>
+  <header class="topbar">
+    <div><span class="eyebrow">ACCESSIBILITY RELEASE DESK</span><h1>无障碍出版放行台</h1></div>
+    <div id="connection" class="connection">本地证据库 · 就绪</div>
+  </header>
+  <main>
+    <aside>
+      <button class="primary" id="new-case">＋ 创建出版个案</button>
+      <h2>出版个案</h2>
+      <div id="case-list" class="case-list"><p class="muted">尚无个案</p></div>
+    </aside>
+    <section class="workspace">
+      <div id="empty" class="empty"><div class="seal">✓</div><h2>从一本待发布出版物开始</h2><p>建档后依次冻结规则、审查、修复、独立复核并归档。</p></div>
+      <div id="case-workspace" hidden>
+        <div class="case-heading"><div><span id="status" class="status"></span><h2 id="title"></h2><p id="edition" class="muted"></p></div><div class="revision">修订号 <strong id="revision"></strong></div></div>
+        <nav id="steps" aria-label="放行流程"></nav>
+        <div id="notice" role="status"></div>
+        <section class="panel" id="overview-panel"><h3>个案总览</h3><div id="overview" class="facts"></div></section>
+        <section class="panel" id="profile-panel"><h3>要求基线</h3><div id="profile-view"></div><form id="profile-form"><label>规则集版本<input name="ruleset_version" value="WCAG-2.2-AA" required></label><label>规则代码（逗号分隔）<input name="rule_codes" value="1.1.1,1.3.1,2.1.1" required></label><label>阻断严重度<select name="blocking"><option value="CRITICAL,MAJOR">严重与主要</option><option value="CRITICAL">仅严重</option></select></label><button type="button" id="preflight-profile" class="secondary">预检基线</button><button>确认并冻结</button></form><div id="preflight-view"></div></section>
+        <section class="panel" id="findings-panel"><h3>发现项</h3><div id="finding-list"></div><form id="finding-form"><div id="finding-rows" class="rows"></div><div class="actions"><button type="button" id="add-finding-row" class="secondary">＋ 增加一行</button><button>批量登记</button></div></form><button id="complete-audit" class="secondary">完成审查并进入整改</button></section>
+        <section class="panel" id="evidence-panel"><h3>修复证据</h3><p class="muted">在发现项卡片中选择“提交证据”，系统校验前后 SHA-256 摘要与验证结论。</p><div id="evidence-list"></div></section>
+        <section class="panel" id="review-panel"><h3>独立复核</h3><div id="review-list"></div><div id="remediation-list"></div><button id="submit-review">提交独立复核</button><form id="decision-form"><label>复核员<input name="reviewer" value="reviewer-01" required></label><label>结论<select name="outcome" id="review-outcome"><option value="APPROVE">批准</option><option value="RETURN">退回整改</option></select></label><label>理由<input name="reason" value="证据完整，职责分离校验通过" required></label><div id="remediation-editor" hidden></div><button>保存复核决定</button></form></section>
+        <section class="panel" id="release-panel"><h3>发布授权</h3><div id="release-view"></div><div id="release-verification"></div><button id="verify-release" class="secondary">立即核验凭证</button><form id="release-form"><label>授权人<input name="authorizer" value="release-manager" required></label><label>有效小时<input type="number" name="valid_hours" value="72" min="1" max="720"></label><button>签发发布凭证</button></form></section>
+        <section class="panel" id="archive-panel"><h3>归档校验</h3><div id="archive-view"></div><div id="archive-verification"></div><button id="archive">冻结证据并归档</button><button id="export-archive" class="secondary">复验并下载</button><details><summary>审计时间线</summary><div id="timeline"></div></details></section>
+      </div>
+    </section>
+  </main>
+  <dialog id="create-dialog"><form id="create-form" method="dialog"><h2>创建出版个案</h2><label>书名<input name="title" required></label><label>版本<input name="edition" required></label><label>载体格式<select name="media_format"><option>EPUB 3</option><option>PDF/UA</option><option>HTML</option></select></label><label>责任人<input name="owner_id" value="owner-01" required></label><label>内容 SHA-256 摘要<input name="content_digest" value="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" pattern="[a-fA-F0-9]{64}" required></label><div class="actions"><button type="button" id="cancel-create" class="secondary">取消</button><button value="submit">创建</button></div></form></dialog>
+  <dialog id="evidence-dialog"><form id="evidence-form" method="dialog"><h2>提交修复证据 <span id="evidence-round"></span></h2><input type="hidden" name="finding_id"><input type="hidden" name="supersedes_evidence_id"><label>修复编辑<input name="actor_id" value="editor-01" required></label><label>变更说明<input name="change_summary" required></label><label>修复前摘要<input name="before_digest" value="bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" pattern="[a-fA-F0-9]{64}" required></label><label>修复后摘要<input name="after_digest" value="cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc" pattern="[a-fA-F0-9]{64}" required></label><label>验证结论<select name="verification_result"><option>PASS</option><option>FAIL</option></select></label><label>失败原因（FAIL 必填）<input name="failure_reason"></label><button>提交证据</button></form></dialog>
+  <script src="/assets/app.js" defer></script>
+</body>
+</html>
